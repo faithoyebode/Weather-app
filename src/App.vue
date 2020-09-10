@@ -1,28 +1,61 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app"  :class="typeof weather.main != 'undefined' && weather.main.temp > 16 ? 'warm' : ''" >
+    <HelloWorld @setWeather="setWeather" @setRandom="setRandom" :weather=weather :random=random />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import HelloWorld from '@/components/HelloWorld.vue'
 
 export default {
   name: 'App',
   components: {
     HelloWorld
+  },
+  data(){
+    return{
+      weather: {},
+      random: "faith"
+    }
+  },
+  methods: {
+    setWeather(results){
+      this.weather = Object.assign({}, this.weather, results);
+      // console.log("emitted: ", results);
+    },
+    setRandom(name){
+      this.random = name;
+    }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+
+}
+
+body{
+  font-family: 'monteserrat', sans-serif;
+  background-color: rgb(223, 246, 252);
+}
+
+#app{
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  min-height: 100vh;
+  width: 500px;
+  background-image: url('./assets/images/cold-bg.jpg');
+  background-size: cover;
+  background-position: bottom;
+  transition: 0.4s;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+#app.warm{
+  background-image: url('./assets/images/warm-bg.jpg');
 }
 </style>
