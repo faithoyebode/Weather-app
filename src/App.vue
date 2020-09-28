@@ -1,6 +1,7 @@
 <template>
+
   <div id="app"  :class="typeof weather.main != 'undefined' && weather.main.temp > 16 ? 'warm' : ''" >
-    <HelloWorld @setWeather="setWeather" @setRandom="setRandom" :weather=weather :random=random />
+    <hello-world @setWeather="setWeather" @setRandom="setRandom" :weather=weather :random=random /> 
   </div>
 </template>
 
@@ -46,7 +47,7 @@ body{
 #app{
   text-align: center;
   min-height: 100vh;
-  width: 500px;
+  max-width: 500px;
   background-image: url('./assets/images/cold-bg.jpg');
   background-size: cover;
   background-position: bottom;

@@ -7,11 +7,18 @@
           class="search-bar" 
           placeholder="Search..." 
           v-model="query"
-          @keypress="fetchWeather"
         />
+        <button @click="fetchWeather" class="search-btn">Get Weather</button>
       </div>
-      <div class="weather-wrap" v-if="weather.name !== undefined">
+      <div v-if="loading === true" class="loader">
+        <Loader />
+      </div>
+      <div v-if="error === true" class="error-text">
+        An error occured
+      </div>
+      <div class="weather-wrap" v-if="weather.name !== undefined && loading === false">
         <div class="location-box">
+            <weather-icons :weather=weather />
           <div class="location">{{ weather.name }}, {{ weather.sys.country }}</div>
           <div class="date">{{ dateBuilder() }}</div>
         </div>
@@ -26,9 +33,16 @@
 </template>
 
 <script>
+import WeatherIcons from '@/components/WeatherIcons.vue';
+import Loader from '@/components/Loader.vue';
 import axios from 'axios';
 export default {
   name: 'HelloWorld',
+  components: {
+    WeatherIcons,
+    Loader
+  },
+    
   props: ['weather'],
   data(){
     return{
@@ -36,22 +50,40 @@ export default {
       url_base: 'https://api.openweathermap.org/data/2.5/',
       query: '',
       LocalRandom: '',
+      loading: false,
+      error: false
     }
   },
   mounted(){
     this.LocalRandom = this.random;
   },
   methods: {
-    fetchWeather(e){
+    fetchWeather(){
+      const empty = {
+        base: undefined,
+        clouds: undefined,
+        cod: undefined,
+        coord:undefined,
+        dt:undefined,
+        id:undefined,
+        main:undefined,
+        name:undefined,
+        sys:undefined,
+        timezone:undefined,
+        visibility:undefined,
+        weather:undefined,
+        wind:undefined
+      }
+
+      this.loading = true;
+      this.error = false;
       const self = this
-      if (e.key == "Enter"){
-        axios.get(`${this.url_base}weather?q=${this.query}&units=metric&APPID=${this.api_key}`, {headers: {'Content-Type': 'application/json'}})
-        .then(res => {this.setResults(self, res.data);});
-      }  
+      axios.get(`${this.url_base}weather?q=${this.query}&units=metric&APPID=${this.api_key}`, {headers: {'Content-Type': 'application/json'}})
+      .then(res => {this.setResults(self, res.data); this.loading = false;}, (err) => {this.error = true; this.loading = false; this.setResults(self, empty); Promise.reject(err);});
+      
     },
     setResults(self, results){
       self.$emit('setWeather', results);
-      self.$emit('setRandom', "amos");
     },
     dateBuilder(){
       let d = new Date();
@@ -63,7 +95,7 @@ export default {
       let month = months[d.getMonth()];
       let year = d.getFullYear();
 
-      return `${day} ${date} ${month} ${year}`;
+      return `${day}, ${date} ${month} ${year}`;
     }
   }
 }
@@ -81,15 +113,30 @@ main{
   width: 100%;
   margin-bottom: 30px;
   padding: 30px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.search-btn{
+  padding: 0 20px;
+  background-color: rgb(69, 93, 226);
+  border: none;
+  color: white;
+  font-size: 16px;
+  margin-left: 20px;
+  border-radius: 20px;
+}
+
+.search-btn:hover{
+  opacity: 0.6;
 }
 
 .search-box .search-bar{
   display: block;
-  width: 100%;
+  width: 65%;
   padding: 15px;
   color: #313131;
   font-size: 20px;
-  appearance: none;
   border: none;
   outline: none;
   background: none;
@@ -106,6 +153,16 @@ main{
 
 .search-box .search-bar:focus{
   background-color: rgba(255, 255, 255, 0.75);
+}
+
+.loader{
+  width: 70px;
+  height: 70px;
+  text-align: center;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  margin-top: 120px;
 }
 
 .location-box .location{
@@ -133,22 +190,27 @@ main{
 
 .weather-box .temp{
   display: inline-block;
-  padding: 10px 25px;
+  padding: 25px 25px;
   font-size: 102px;
   font-weight: 900;
   text-shadow: 3px 6px rgba(0, 0, 0, 0.25);
   color: #fff;
   background-color: rgba(255, 255, 255, 0.25);
   border-radius: 16px;
-  margin: 30px 0;
+  margin: 65px 0;
   box-shadow: 3px 6px rgba(0, 0, 0, 0.25);
 }
 
-.weather-box .weather{
+.weather-box .weather, .error-text{
   color: #fff;
   font-size: 48px;
   font-weight: 700;
   font-style: italic;
   text-shadow: 3px 6px rgba(0, 0, 0, 0.25);
 }
+
+ .error-text{
+   color: rgba(253, 39, 39, 0.719);
+   margin-top: 100px;
+ }
 </style>
